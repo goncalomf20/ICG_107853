@@ -2,506 +2,271 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gals! The Game</title>
-</head>
-<body>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
     <style>
         body {
-          margin: 0;
-          background: #77c3ec;
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars from appearing */
         }
     </style>
-      
-    <script
-      async
-      src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
-    ></script>
-      
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
-          "three/addons/": "https://unpkg.com/three@0.150.1/examples/jsm/"
-        }
-      }
-    </script>
-      
-    <script type="module">
-      import * as THREE from 'three';
-      import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
-      import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+</head>
+<body>
+    <div>
+        <section id="main-section" style="background-color: #77c3ec" class="dark:bg-gray-900 section-container">
+            <!-- Content will be dynamically inserted here -->
+        </section>
+    </div>
 
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.set(4.61, 2.74, 8);
-      const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
-      renderer.shadowMap.enabled = true;
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.body.appendChild(renderer.domElement);
-
-      const controls = new OrbitControls(camera, renderer.domElement);
-
-      // Example Sketchfab model download URI
-      const modelDownloadUri = 'assets/scene.gltf';
-      const modelDownloadCar = 'assets/car/scene.gltf';
-      const modelDownloadForest = 'assets/forest/scene.gltf'
-      const modelDownloadSun = 'assets/sun/scene.gltf'
-
-      let chickenModel;
-      let carModel;
-      let forestModel;
-      let sunModel;
-      const walls = []
-
-      const loader = new GLTFLoader();
-      loader.load(modelDownloadUri, function (gltf) {
-          chickenModel = gltf.scene;
-          chickenModel.scale.set(2, 2, 2);
-          scene.add(chickenModel);
-          
-          chickenModel.position.set(0, 0, 0);
-
-          // Rotate the chicken
-          chickenModel.rotation.y = -Math.PI / 2; 
-      }, undefined, function (error) {
-          console.error(error);
-      });
-
-      loader.load(modelDownloadCar, function (gltf) {
-          carModel = gltf.scene;
-          carModel.scale.set(0.0089, 0.0089, 0.0089);
-          
-          carModel.position.set(0, 0, 0);
-
-          // Rotate the car
-          carModel.rotation.y = -Math.PI; 
-      }, undefined, function (error) {
-          console.error(error);
-      });
-      
-      loader.load(modelDownloadSun, function (gltf) {
-          sunModel = gltf.scene;
-          sunModel.scale.set(0.5, 0.5 , 0.5);
-          
-          sunModel.position.set( 0 , 200, -400);
-          scene.add(sunModel);
-
-      }, undefined, function (error) {
-          console.error(error);
-      });
-      
-      loader.load(modelDownloadForest, function (gltf) {
-          forestModel = gltf.scene;
-          forestModel.scale.set(1, 1, 1);
-          
-          forestModel.position.set(0,3.2, -170);
-          scene.add(forestModel);
-          // Rotate the car 
-      }, undefined, function (error) {
-          console.error("Forest Error Loading: " , error);
-      });
-
-      
-
-      
-
-
-      class Box extends THREE.Mesh {
-        constructor({
-          width,
-          height,
-          depth,
-          transparent = true,
-          color = '#ff0000',
-          texture = null,
-          opacity = 1,
-          velocity = {
-            x: 0,
-            y: 0,
-            z: 0
-          },
-          position = {
-            x: 0,
-            y: 0,
-            z: 0
-          },
-          rotation = {
-            x: 0,
-            y: 0,
-            z: 0
-          },
-          zAcceleration = false
-        }) {
-          if (texture) {
-            super(
-              new THREE.BoxGeometry(width, height, depth),
-              new THREE.MeshStandardMaterial({ map: texture })
-            )
-          } else {
-            super(
-              new THREE.BoxGeometry(width, height, depth),
-              new THREE.MeshStandardMaterial({ color, transparent: transparent, opacity: opacity })
-            )
-          }
-         
+    <script>
+    function initializeSection() {
+        const mainSection = document.getElementById("main-section");
+        const storedNickname = localStorage.getItem("nickname");
     
-          this.width = width
-          this.height = height
-          this.depth = depth
-          
-          this.rotation.x = rotation.x
-          this.rotation.y = rotation.y
-          this.rotation.z = rotation.z
+        if (storedNickname) {
+            mainSection.innerHTML = `
+        <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16">
+            <h2 class="mb-4 text-3xl font-bold text-gray-900">Hey ${storedNickname}!</h2>
+            <h3 class="mb-4 text-xl font-bold text-gray-900">Choose one of the 3 different levels:</h3>
 
-          this.position.set(position.x, position.y, position.z)
-    
-          this.right = this.position.x + this.width / 2
-          this.left = this.position.x - this.width / 2
-    
-          this.bottom = this.position.y - this.height / 2
-          this.top = this.position.y + this.height / 2
-    
-          this.front = this.position.z + this.depth / 2
-          this.back = this.position.z - this.depth / 2
-    
-          this.velocity = velocity
-          this.gravity = -0.002
-    
-          this.zAcceleration = zAcceleration
-        }
-    
-        updateSides() {
-          this.right = this.position.x + this.width / 2
-          this.left = this.position.x - this.width / 2
-    
-          this.bottom = this.position.y - this.height / 2
-          this.top = this.position.y + this.height / 2
-    
-          this.front = this.position.z + this.depth / 2
-          this.back = this.position.z - this.depth / 2
-        }
-    
-        update(ground) {
-          this.updateSides()
-    
-          if (this.zAcceleration) this.velocity.z += 0.0003
-    
-          this.position.x += this.velocity.x
-          this.position.z += this.velocity.z
-    
-          this.applyGravity(ground)
-        }
-    
-        applyGravity(ground) {
-          this.velocity.y += this.gravity
-    
-          if (
-            boxCollision({
-              box1: this,
-              box2: ground
-            })
-          ) {
-            const friction = 0.5
-            this.velocity.y *= friction
-            this.velocity.y = -this.velocity.y
-          } else this.position.y += this.velocity.y
-        }
-      }
-      let score = 0; // Initialize the score
-        let scoreDisplay = document.createElement('div'); // Create a DOM element to display the score
-        scoreDisplay.style.position = 'absolute';
-        scoreDisplay.style.top = '10px';
-        scoreDisplay.style.left = '10px';
-        scoreDisplay.style.color = '#ffffff';
-        scoreDisplay.style.fontFamily = 'Arial';
-        scoreDisplay.style.fontSize = '24px';
-        document.body.appendChild(scoreDisplay); // Append the score display to the document body
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Level 1 -->
+                <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                    <a href="#" id="level-1-link">
+                        <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Level 1: The Forest</h5>
+                    </a>
+                    <p class="mb-3 text-gray-500 dark:text-gray-400">Help the chicken navigate through the forest.</p>
+                </div>
 
-        function updateScore() {
-          score++;
-          scoreDisplay.textContent = `Score: ${score}`;
-        }
+                <!-- Level 2 -->
+                <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                    <a href="#" id="level-2-link">
+                        <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Level 2: The City</h5>
+                    </a>
+                    <p class="mb-3 text-gray-500 dark:text-gray-400">Cross the road without getting hit by cars!</p>
+                </div>
 
-      const groundtexture = new THREE.TextureLoader().load('/assets/foresttexture.jpg');
-      groundtexture.wrapS = THREE.RepeatWrapping;
-      groundtexture.wrapT = THREE.RepeatWrapping;
-      groundtexture.repeat.set(10, 10);
+                <!-- Level 3 -->
+                <div class="max-w-sm p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                    <a href="#" id="level-3-link">
+                        <h5 class="mb-2 text-2xl font-semibold tracking-tight text-gray-900 dark:text-white">Level 3: The Space</h5>
+                    </a>
+                    <p class="mb-3 text-gray-500 dark:text-gray-400">Navigate through space and avoid obstacles.</p>
+                </div>
+            </div>
 
-      const ground = new Box({
-        width: 50,
-        height: 0.5,
-        depth: 50,
-        color: '#288C1E',
-        opacity: 0.1,
-        position: {
-          x: 0,
-          y: -1,
-          z: -15
-        },
-        rotation: {
-          x: 0,
-          y: -Math.PI / 2,
-          z: 0,
-        }
-        
-      })
-      scene.add(ground)
-    
-      function boxCollision({ box1, box2 }) {
-        if (box2.passable) {
-              return false;
-        }
-        else{
-        const xCollision = box1.right >= box2.left && box1.left <= box2.right
-        const yCollision =
-          box1.bottom + box1.velocity.y <= box2.top && box1.top >= box2.bottom
-        const zCollision = box1.front >= box2.back && box1.back <= box2.front
-        return xCollision && yCollision && zCollision
-        }
-      }
-
-      function wallCollision(box1){
-        if (chickenCube.position.x > 5 || chickenCube.position.x < -5 || chickenCube.position.z > 8 || chickenCube.position.z < -30){
-        return true;
-        }
-        return false;
-      }
-      
-      const light = new THREE.DirectionalLight(0xffffff, 1)
-      light.position.y = 3
-      light.position.z = 1
-      light.castShadow = true
-      scene.add(light)
-    
-      scene.add(new THREE.AmbientLight(0xffffff, 0.5))
-    
-      camera.position.z = 5
-    
-      const keys = {
-        a: {
-          pressed: false
-        },
-        d: {
-          pressed: false
-        },
-        s: {
-          pressed: false
-        },
-        w: {
-          pressed: false
-        }
-      }
-    
-      let doubleJumpAvailable = true; // Flag to check if double jump is available
-
-      window.addEventListener('keydown', (event) => {
-        switch (event.code) {
-          case 'KeyA':
-            keys.a.pressed = true;
-            break;
-          case 'KeyD':
-            keys.d.pressed = true;
-            break;
-          case 'KeyS':
-            keys.s.pressed = true;
-            break;
-          case 'KeyW':
-            keys.w.pressed = true;
-            break;
-          case 'Space':
-            if (doubleJumpAvailable) {
-              chickenCube.velocity.y = 0.1;
-              doubleJumpAvailable = false;
-              setTimeout(() => {
-                doubleJumpAvailable = true;
-              }, 2000);
-            }
-            break;
-        }
-      });
-        
-      window.addEventListener('keyup', (event) => {
-        switch (event.code) {
-          case 'KeyA':
-            keys.a.pressed = false
-            break
-          case 'KeyD':
-            keys.d.pressed = false
-            break
-          case 'KeyS':
-            keys.s.pressed = false
-            break
-          case 'KeyW':
-            keys.w.pressed = false
-            break
-        }
-      })
-    
-      const logs = []
-      const cars = []
-
-      const chickenCube = new Box({
-        width: 0.6,
-        height: 1,
-        opacity: 0,
-        depth: 0.5,
-        velocity: {
-          x: 0,
-          y: 0,
-          z: 0
-        },
-        position: {
-          x: 0,
-          y: 0,
-          z: 0
-        },
-      })
-      chickenCube.rotation.y = -Math.PI / 2 
-      scene.add(chickenCube)
-
-    
-      let frames = 0
-      let spawnRate = 400
-      function animate() {
-        const animationId = requestAnimationFrame(animate)
-        renderer.render(scene, camera)
-    
-        // movement code
-        chickenCube.velocity.x = 0
-        chickenCube.velocity.z = 0
-        if (keys.a.pressed) chickenCube.velocity.x = -0.05
-        else if (keys.d.pressed) chickenCube.velocity.x = 0.05
-    
-        if (keys.s.pressed) chickenCube.velocity.z = 0.05
-        else if (keys.w.pressed) chickenCube.velocity.z = -0.05
-    
-        chickenCube.update(ground)
-        if (chickenModel) {
-          chickenModel.position.x = chickenCube.position.x 
-          chickenModel.position.y = chickenCube.position.y - 0.2 
-          chickenModel.position.z = chickenCube.position.z - 0.2
-        }
-        logs.forEach((log) => {
-          updateScore();
-          log.update(ground)
-          if (
-            boxCollision({
-              box1: chickenCube,
-              box2: log
-            })
-          ) {
-            cancelAnimationFrame(animationId)
-          }
-        })
-        
-        if (wallCollision({box1: chickenCube, walls: walls})) {
-          cancelAnimationFrame(animationId)
-        }
+            <!-- Button to show the score table -->
+            <div class="mt-6">
+                <button id="show-score" class="w-full py-3 px-6 text-white font-medium text-lg bg-blue-600 hover:bg-blue-700 rounded-lg">
+                    Show Score Table
+                </button>
+            </div>
+        </div>
+        `;
 
 
-                
-
-        // if (frames % spawnRate === 0) {
-        //     if (spawnRate > 20) spawnRate -= 20;
-
-        //     const c = new Box({
-        //         width: 2,
-        //         height: 1,
-        //         depth: 1,
-        //         transparent: false,
-        //         position: {
-        //             x: 10, 
-        //             y: 1,
-        //             z: (Math.random() - 0.5) * 8, 
-        //         },
-        //         velocity: {
-        //             x: -0.1,
-        //             y: 0,
-        //             z: 0, // Adjust z velocity for car speed
-        //         },
-        //         zAcceleration: false // No need for z acceleration for cars
-        //     });
-        //     c.add(carModel.clone());
-        //     scene.add(c);
-        //     cars.push(c); 
-        // }
-
-        cars.forEach((car) => {
-            car.update(ground);
-            if (
-                boxCollision({
-                    box1: chickenCube,
-                    box2: car
-                })
-            ) {
-                cancelAnimationFrame(animationId);
-            }
-            // Remove cars that move out of view
-            if (car.position.z > 10) {
-                scene.remove(car);
-                const index = cars.indexOf(car);
-                if (index > -1) {
-                    cars.splice(index, 1);
-                }
-            }
+        // Event listeners for the level links to relocate
+        document.getElementById("level-1-link").addEventListener("click", (event) => {
+            event.preventDefault(); // Prevent the default anchor behavior
+            window.location.href = "/forest.html"; // Navigate to Level 1
         });
-        
-        
-    
-        if (frames % spawnRate === 0) {
-          if (spawnRate > 5) spawnRate -= 5
-          
-          var textureLoader = new THREE.TextureLoader();
 
-          const log = new Box({
-            width: 2,
-            height: 1,
-            opacity: 0,
-            depth: 1,
-            texture: textureLoader.load('assets/woodtexture.jpg'),
-            transparent:false,
-            position: {
-              x: (Math.random() - 0.5) * 10,
-              y: 0,
-              z: -20
-            },
-            velocity: {
-              x: 0,
-              y: 0,
-              z: 0.005
-            },
-            zAcceleration: true
-          })
-          scene.add(log)
-          logs.push(log)
-          
-        } 
-       
-        const car = new Box({
-            width: 2,
-            height: 1,
-            opacity: 0,
-            depth: 1,
-            transparent:false,
-            position: {
-              x: (Math.random() - 0.5) * 10,
-              y: 0,
-              z: -20
-            },
-            velocity: {
-              x: 0,
-              y: 0,
-              z: 0.005
-            },
-            zAcceleration: true
-          })
+        document.getElementById("level-2-link").addEventListener("click", (event) => {
+            event.preventDefault();
+            window.location.href = "/road.html"; // Navigate to Level 2
+        });
+
+        document.getElementById("level-3-link").addEventListener("click", (event) => {
+            event.preventDefault();
+            window.location.href = "/space.html"; // Navigate to Level 3
+        });
     
-        frames++
-        
-      }
-      animate()
+            // Show the score table when the button is clicked
+            document.getElementById("show-score").addEventListener("click", () => {
+                const levelScores = JSON.parse(localStorage.getItem("level-scores")) || {};
+    
+                let allScores = [];
+                Object.keys(levelScores).forEach((level) => {
+                    levelScores[level].forEach((score) => {
+                        allScores.push({ ...score, level }); // Add level to each score object
+                    });
+                });
+    
+                // Sort scores by the 'score' property in descending order
+                allScores.sort((a, b) => b.score - a.score);
+    
+                let tableRows = "";
+                allScores.forEach((score, index) => {
+                    tableRows += `
+                    <tr>
+                        <td class="px-6 py-4">${index + 1}</td>
+                        <td class="px-6 py-4">${score.nickname}</td>
+                        <td class="px-6 py-4">${score.level}</td>
+                        <td class="px-6 py-4">${score.score}</td>
+                    </tr>
+                    `;
+                });
+    
+                mainSection.innerHTML = `
+                <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16">
+                    <h3 class="mb-4 text-2xl font-bold text-gray-900">Scoreboard</h3>
+                    <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                            <tr>
+                                <th scope="col" class="px-6 py-3">Rank</th>
+                                <th scope="col" class="px-6 py-3">Nickname</th>
+                                <th scope="col" class="px-6 py-3">Level</th>
+                                <th scope="col" class="px-6 py-3">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${tableRows}
+                        </tbody>
+                    </table>
+                    <div class="mt-6 text-center">
+                        <button id="export-scores" class="py-3 px-6 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700">
+                            Export Scores
+                        </button>
+                        <button id="go-back" class="py-3 px-6 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 ms-4">
+                            Go Back
+                        </button>
+                    </div>
+                </div>
+                `;
+    
+                document.getElementById("export-scores").addEventListener("click", () => {
+                    alert("Exporting scores...");
+                    // Logic to export scores
+                });
+    
+                document.getElementById("go-back").addEventListener("click", () => {
+                    initializeSection(); // Go back to the previous section
+                });
+            });
+        } else {
+            // If no nickname, show the "Get Started" prompt
+            mainSection.innerHTML = `
+            <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16">
+                <h1 class="mb-4 text-4xl font-extrabold tracking-tight leading-none text-gray-900">Gals! The Game</h1>
+                <p class="mb-8 text-lg text-gray-500">Wonder why the chicken crossed the road? Let's find out!</p>
+                <button id="get-started" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-white bg-blue-700 hover:bg-blue-800 rounded-lg">
+                    Get Started
+                </button>
+            </div>
+            `;
+    
+            document.getElementById("get-started").addEventListener("click", () => {
+                // Prompt for nickname
+                mainSection.innerHTML = `
+                <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16">
+                    <h2 class="mb-4 text-3xl font-bold text-gray-900">Welcome!</h2>
+                    <p class="mb-8 text-lg text-gray-500">Please enter your name and accept the terms to continue:</p>
+                    <form id="nickname-form">
+                        <div class="mb-4">
+                            <input type="text" id="nickname" class="w-full p-3 border rounded-lg" placeholder="Your Name" />
+                        </div>
+                        <div class="mb-4 flex items-center">
+                            <input type="checkbox" id="accept" class="me-2" />
+                            <label for="accept" class="text-gray-500">I accept the terms and conditions</label>
+                        </div>
+                        <button type="submit" class="inline-flex justify-center items-center py-3 px-5 text-base font-medium text-white bg-blue-700 hover:bg-blue-800">
+                            Submit
+                        </button>
+                    </form>
+                </div>
+                `;
+    
+                document.getElementById("nickname-form").addEventListener("submit", (event) => {
+                    event.preventDefault(); // Prevent form submission
+                    const nickname = document.getElementById("nickname").value.trim();
+                    if (nickname) {
+                        localStorage.setItem("nickname", nickname); // Store nickname
+                        initializeSection(); // Re-initialize
+                    } else {
+                        alert("Please enter a valid name.");
+                    }
+                });
+            });
+        }
+    }
+    
+    initializeSection(); // Initialize section based on local storage
+        </script>
+
+
+
+    <script
+        async
+        src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
+    ></script>
+
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.150.1/examples/jsm/"
+        }
+    }
+    </script>
+
+    <script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+    import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+    const scene = new THREE.Scene();
+
+    // Set a light blue background
+    scene.background = new THREE.Color(0x77c3ec);
+
+    const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(10, 10, 10);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.target.set(0, 0, 0);
+    controls.update();
+
+    const loader = new GLTFLoader();
+    let forestModel, sunModel;
+
+    loader.load('assets/forest/scene.gltf', function (gltf) {
+        forestModel = gltf.scene;
+        forestModel.scale.set(1, 1, 1);
+        scene.add(forestModel);
+    });
+
+    loader.load('assets/sun/scene.gltf', function (gltf) {
+        sunModel = gltf.scene;
+        sunModel.scale.set(0.5, 0.5, 0.5);
+        sunModel.position.set(0, 50, -100);
+        scene.add(sunModel);
+    });
+
+    const light = new THREE.DirectionalLight(0xffffff, 1);
+    light.position.set(10, 20, 10);
+    light.castShadow = true;
+    scene.add(light);
+
+    const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+    scene.add(ambientLight);
+
+    function animate() {
+        requestAnimationFrame(animate);
+
+        // Rotate the camera around the scene
+        camera.position.x = 20 * Math.cos(Date.now() * 0.0001);
+        camera.position.z = 20 * Math.sin(Date.now() * 0.0001);
+        camera.lookAt(0, 0, 0);
+
+        renderer.render(scene, camera);
+    }
+
+    animate();
     </script>
 </body>
 </html>
