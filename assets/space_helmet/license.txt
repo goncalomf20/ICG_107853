@@ -1,0 +1,11 @@
+Model Information:
+* title:	Junior's Space Helmet
+* source:	https://sketchfab.com/3d-models/juniors-space-helmet-8eb435cca34f4145a2aa607f59fb0a9e
+* author:	321_Blender (https://sketchfab.com/321_Blender)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Junior's Space Helmet" (https://sketchfab.com/3d-models/juniors-space-helmet-8eb435cca34f4145a2aa607f59fb0a9e) by 321_Blender (https://sketchfab.com/321_Blender) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
