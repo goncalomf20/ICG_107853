@@ -5,29 +5,54 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gals! The Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <style>
-        body {
-          margin: 0;
-          background: #000000;
-        }
-    </style>
-      
-    <script
-      async
-      src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
-    ></script>
-      
-    <script type="importmap">
-      {
-        "imports": {
-          "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
-          "three/addons/": "https://unpkg.com/three@0.150.1/examples/jsm/"
-        }
+<body class="flex items-center justify-center min-h-screen bg-black">
+  <div id="menu" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-80" style="display: none;">
+    <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+        <div class="p-5">
+            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Gals! The Game</h5>
+            <h6 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">The UFOs are trying to kill the first chicken on the moon, use the gravity and your best skills to avoid'em! But be careful, some of them are faster.</h6>
+            <img class="rounded-t-lg mb-4" src="/assets/level3.gif" alt="Game GIF" />
+            <div class="pb-4">
+                <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">W</kbd>
+                <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">A</kbd>
+                <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">S</kbd>
+                <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">D</kbd>
+                <kbd class="p-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">SPACE</kbd>
+            </div>
+            <div class="flex flex-col space-y-4">
+                <button id="restartButton" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    Restart
+                </button>
+                <button id="startButton" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    Start
+                </button>
+                <button id="menuButton" onclick="window.location.href='/index.html';" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                    Go to Menu
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+  <script
+    async
+    src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"
+  ></script>
+    
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@0.150.1/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@0.150.1/examples/jsm/"
       }
-    </script>
-      
+    }
+  </script>
+  
+</body>
+</html>
+
     <script type="module">
       import * as THREE from 'three';
       import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
@@ -56,23 +81,28 @@
       const moonSphere = new THREE.Mesh(moonGeometry, moonMaterial);
 
       // Position the moon sphere in the scene
-      moonSphere.position.set(0, -201, -10); // Position to avoid collisions with other objects
+      moonSphere.position.set(-5, -200.5, -10); // Position to avoid collisions with other objects
       moonSphere.rotation.x = Math.PI / 4; // Initial rotation along the x-axis
       scene.add(moonSphere);
+
       // Example Sketchfab model download URI
       const modelDownloadUri = 'assets/scene.gltf';
       const modelDownloadSpaceHelmet = 'assets/space_helmet/scene.gltf';
       const modelDownloadCar = 'assets/car/scene.gltf';
-      const modelDownloadForest = 'assets/planet_earth/scene.gltf'
-      const modelDownloadSun = 'assets/sun/scene.gltf'
+      const modelDownloadForest = 'assets/planet_earth/scene.gltf';
+      const modelDownloadSun = 'assets/sun/scene.gltf';
+      const modelDownloadUFO = 'assets/ufo/scene.gltf';
+      const modelDownloadUFO2 = 'assets/ufo_2/scene.gltf';
 
       let chickenModel;
+      let UFOModel;
+      let UFOModel2;
       let carModel;
       let spaceHelmetModel;
       let forestModel;
       let sunModel;
       let moonModel;
-      const walls = []
+      const walls = [];
 
       const loader = new GLTFLoader();
       loader.load(modelDownloadUri, function (gltf) {
@@ -101,8 +131,6 @@
           console.error(error);
       });
 
-      
-      
       loader.load(modelDownloadSun, function (gltf) {
           sunModel = gltf.scene;
           sunModel.scale.set(0.5, 0.5 , 0.5);
@@ -113,7 +141,7 @@
       }, undefined, function (error) {
           console.error(error);
       });
-      
+
       loader.load(modelDownloadForest, function (gltf) {
           forestModel = gltf.scene;
           forestModel.scale.set(10, 10, 10);
@@ -125,10 +153,25 @@
           console.error("Forest Error Loading: " , error);
       });
 
-      
+      loader.load(modelDownloadUFO, function (gltf) {
+          UFOModel = gltf.scene;
+          UFOModel.scale.set(0.005, 0.005 , 0.005);
+          
+          UFOModel.position.set(0,0,0);
 
-      
+      }, undefined, function (error) {
+          console.error(error);
+      });
 
+      loader.load(modelDownloadUFO2, function (gltf) {
+          UFOModel2 = gltf.scene;
+          UFOModel2.scale.set(0.005, 0.005 , 0.005);
+          
+          UFOModel2.position.set(0,0,0);
+
+      }, undefined, function (error) {
+          console.error(error);
+      });
 
       class Box extends THREE.Mesh {
         constructor({
@@ -138,7 +181,9 @@
           transparent = true,
           color = '#ff0000',
           texture = null,
+          gravity = true,
           opacity = 1,
+          shot = false,
           velocity = {
             x: 0,
             y: 0,
@@ -189,8 +234,11 @@
           this.back = this.position.z - this.depth / 2
     
           this.velocity = velocity
-          this.gravity = -0.002
-    
+          if (gravity){
+            this.gravity = -0.0002
+          } else {
+            this.gravity = 0
+          }
           this.zAcceleration = zAcceleration
         }
     
@@ -231,20 +279,30 @@
           } else this.position.y += this.velocity.y
         }
       }
-      let score = 0; // Initialize the score
-        let scoreDisplay = document.createElement('div'); // Create a DOM element to display the score
-        scoreDisplay.style.position = 'absolute';
-        scoreDisplay.style.top = '10px';
-        scoreDisplay.style.left = '10px';
-        scoreDisplay.style.color = '#ffffff';
-        scoreDisplay.style.fontFamily = 'Arial';
-        scoreDisplay.style.fontSize = '24px';
-        document.body.appendChild(scoreDisplay); // Append the score display to the document body
 
-        function updateScore() {
-          score++;
-          scoreDisplay.textContent = `Score: ${score}`;
-        }
+      function setScore(score) {
+        let scores = JSON.parse(localStorage.getItem('level-scores'));
+        let nickname = localStorage.getItem('nickname');
+        const newScore = { "nickname": nickname, "score": score};
+        scores['Level 3'].push(newScore);
+
+        localStorage.setItem('level-scores', JSON.stringify(scores));
+      }
+
+      let score = 0; // Initialize the score
+      let scoreDisplay = document.createElement('div'); // Create a DOM element to display the score
+      scoreDisplay.style.position = 'absolute';
+      scoreDisplay.style.top = '10px';
+      scoreDisplay.style.left = '10px';
+      scoreDisplay.style.color = '#ffffff';
+      scoreDisplay.style.fontFamily = 'Arial';
+      scoreDisplay.style.fontSize = '24px';
+      document.body.appendChild(scoreDisplay); // Append the score display to the document body
+
+      function updateScore() {
+        score++;
+        scoreDisplay.textContent = `Score: ${score}`;
+      }
 
       const groundtexture = new THREE.TextureLoader().load('/assets/moonTexture.jpg');
       groundtexture.wrapS = THREE.RepeatWrapping;
@@ -253,7 +311,7 @@
 
       const ground = new Box({
         width: 50,
-        height: 0.5,
+        height: 0.1,
         depth: 50,
         color: '#ffffff',
         opacity: 0,
@@ -267,15 +325,13 @@
           y: -Math.PI / 2,
           z: 0,
         }
-        
       })
       scene.add(ground)
     
       function boxCollision({ box1, box2 }) {
         if (box2.passable) {
               return false;
-        }
-        else{
+        } else {
         const xCollision = box1.right >= box2.left && box1.left <= box2.right
         const yCollision =
           box1.bottom + box1.velocity.y <= box2.top && box1.top >= box2.bottom
@@ -334,11 +390,11 @@
             break;
           case 'Space':
             if (doubleJumpAvailable) {
-              chickenCube.velocity.y = 0.1;
+              chickenCube.velocity.y = 0.05;
               doubleJumpAvailable = false;
               setTimeout(() => {
                 doubleJumpAvailable = true;
-              }, 2000);
+              }, 5000);
             }
             break;
         }
@@ -361,14 +417,14 @@
         }
       })
     
-      const logs = []
-      const cars = []
+      const ufos = []
 
       const chickenCube = new Box({
         width: 0.6,
         height: 1,
         opacity: 0,
         depth: 0.5,
+        gravity: true,
         velocity: {
           x: 0,
           y: 0,
@@ -383,11 +439,12 @@
       chickenCube.rotation.y = -Math.PI / 2 
       scene.add(chickenCube)
 
-    
+      let animationId; // Declare animationId outside the animate function
+
       let frames = 0
       let spawnRate = 400
       function animate() {
-        const animationId = requestAnimationFrame(animate)
+        animationId = requestAnimationFrame(animate)
         renderer.render(scene, camera)
     
         // movement code
@@ -408,125 +465,129 @@
           chickenModel.position.y = chickenCube.position.y - 0.2 
           chickenModel.position.z = chickenCube.position.z - 0.2
         }
-        logs.forEach((log) => {
+        ufos.forEach((ufo) => {
           updateScore();
-          log.update(ground)
+          if (ufo.position.z > 100){
+            scene.remove(ufo)
+            ufos.splice(ufos.indexOf(ufo), 1)
+          }
+          ufo.update(ground)
           if (
             boxCollision({
               box1: chickenCube,
-              box2: log
+              box2: ufo
             })
           ) {
+            console.log('ufo')
             cancelAnimationFrame(animationId)
+            setScore(score);
+            showMenu("restart");
           }
         })
         
+      
+        
         if (wallCollision({box1: chickenCube, walls: walls})) {
-          cancelAnimationFrame(animationId)
+          chickenCube.position.x = chickenCube.position.x > 5 ? 5 : -5;
+        }
+        if (score >= 150000 ) {
+          spawnRate = 100; 
+        }
+        if (score >= 300000 ) {
+          spawnRate = 50; 
+        }
+        if (score >= 1000000 ) {
+          spawnRate = 25; 
         }
 
-
-                
-
-        // if (frames % spawnRate === 0) {
-        //     if (spawnRate > 20) spawnRate -= 20;
-
-        //     const c = new Box({
-        //         width: 2,
-        //         height: 1,
-        //         depth: 1,
-        //         transparent: false,
-        //         position: {
-        //             x: 10, 
-        //             y: 1,
-        //             z: (Math.random() - 0.5) * 8, 
-        //         },
-        //         velocity: {
-        //             x: -0.1,
-        //             y: 0,
-        //             z: 0, // Adjust z velocity for car speed
-        //         },
-        //         zAcceleration: false // No need for z acceleration for cars
-        //     });
-        //     c.add(carModel.clone());
-        //     scene.add(c);
-        //     cars.push(c); 
-        // }
-
-        cars.forEach((car) => {
-            car.update(ground);
-            if (
-                boxCollision({
-                    box1: chickenCube,
-                    box2: car
-                })
-            ) {
-                cancelAnimationFrame(animationId);
-            }
-            // Remove cars that move out of view
-            if (car.position.z > 10) {
-                scene.remove(car);
-                const index = cars.indexOf(car);
-                if (index > -1) {
-                    cars.splice(index, 1);
-                }
-            }
-        });
         
-        
-    
-        if (frames % spawnRate === 0) {
-          if (spawnRate > 5) spawnRate -= 5
+
+
+
+        if (frames % spawnRate === 0 && spawnRate > 0) {
+          if (spawnRate > 5 || spawnRate < 165) spawnRate -= 5
           
           var textureLoader = new THREE.TextureLoader();
+          if (Math.random() < 0.5){
+          const ufo = new Box({
+            width: 1,
+            height: 1.5,
+            opacity: 0,
+            depth: 1,
+            transparent:true,
+            gravity: false,
+            shoot: false,
+            position: {
+              x: (Math.random() - 0.5) * 10,
+              y: 0 ,
+              z: -20
+            },
+            velocity: {
+              x: 0,
+              y: 0,
+              z: 0.005
+            },
+            zAcceleration: true
+          })
+          ufo.add(UFOModel.clone());
+          scene.add(ufo)
+          ufos.push(ufo)
+        } else {
 
-          const log = new Box({
-            width: 2,
-            height: 1,
+
+          const ufo2 = new Box({
+            width: 1,
+            height: 1.5,
             opacity: 0,
             depth: 1,
-            texture: textureLoader.load('assets/woodtexture.jpg'),
-            transparent:false,
+            transparent:true,
+            gravity: false,
             position: {
               x: (Math.random() - 0.5) * 10,
-              y: 0,
+              y: 0.5,
               z: -20
             },
             velocity: {
               x: 0,
               y: 0,
-              z: 0.005
+              z: 0.04
             },
             zAcceleration: true
           })
-          scene.add(log)
-          logs.push(log)
+          ufo2.add(UFOModel2.clone());
+          scene.add(ufo2)
+          ufos.push(ufo2)
           
+          }
         } 
-       
-        const car = new Box({
-            width: 2,
-            height: 1,
-            opacity: 0,
-            depth: 1,
-            transparent:false,
-            position: {
-              x: (Math.random() - 0.5) * 10,
-              y: 0,
-              z: -20
-            },
-            velocity: {
-              x: 0,
-              y: 0,
-              z: 0.005
-            },
-            zAcceleration: true
-          })
-    
         frames++
-        
       }
-      animate()
+
+      function showMenu(restart) {
+        document.getElementById('menu').style.display = 'flex';
+        if (restart === "restart") {
+          document.getElementById('restartButton').style.display = 'flex';
+          document.getElementById('startButton').style.display = 'none';
+        } else {
+          document.getElementById('restartButton').style.display = 'none';
+          document.getElementById('startButton').style.display = 'flex';
+        }
+      }
+
+
+
+      document.getElementById('startButton').addEventListener('click', () => {
+        document.getElementById('menu').style.display = 'none';
+        setTimeout(100)
+        animate();
+      });
+
+
+      document.getElementById('restartButton').addEventListener('click', () => {
+        location.reload();
+      });
+
+      showMenu();
     </script>
 </body>
 </html>

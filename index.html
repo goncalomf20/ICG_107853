@@ -92,14 +92,18 @@
                         allScores.push({ ...score, level }); // Add level to each score object
                     });
                 });
-    
+
                 // Sort scores by the 'score' property in descending order
                 allScores.sort((a, b) => b.score - a.score);
+
+                // Take only the top 10 scores
+                allScores = allScores.slice(0, 10);
+    
     
                 let tableRows = "";
                 allScores.forEach((score, index) => {
                     tableRows += `
-                    <tr>
+                    <tr class="bg-gray-100 hover:bg-gray-200">
                         <td class="px-6 py-4">${index + 1}</td>
                         <td class="px-6 py-4">${score.nickname}</td>
                         <td class="px-6 py-4">${score.level}</td>
@@ -112,7 +116,7 @@
                 <div class="py-8 px-4 mx-auto max-w-screen-xl text-center lg:py-16">
                     <h3 class="mb-4 text-2xl font-bold text-gray-900">Scoreboard</h3>
                     <table class="w-full text-sm text-left text-gray-500 dark:text-gray-400">
-                        <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                        <thead class="text-xs text-gray-700 uppercase bg-gray-300 dark:bg-gray-700 dark:text-gray-400">
                             <tr>
                                 <th scope="col" class="px-6 py-3">Rank</th>
                                 <th scope="col" class="px-6 py-3">Nickname</th>
@@ -128,7 +132,7 @@
                         <button id="export-scores" class="py-3 px-6 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700">
                             Export Scores
                         </button>
-                        <button id="go-back" class="py-3 px-6 bg-orange-600 text-white font-medium rounded-lg hover:bg-orange-700 ms-4">
+                        <button id="go-back" class="py-3 px-6 bg-yellow-600 text-white font-medium rounded-lg hover:bg-orange-700 ms-4">
                             Go Back
                         </button>
                     </div>
@@ -182,7 +186,10 @@
                     const nickname = document.getElementById("nickname").value.trim();
                     if (nickname) {
                         localStorage.setItem("nickname", nickname); // Store nickname
-                        initializeSection(); // Re-initialize
+                        if (!localStorage.getItem("level-scores")){
+                            localStorage.setItem("level-scores", JSON.stringify({"Level 1": [], "Level 2": [], "Level 3": []}));
+                        }
+                        initializeSection(); // Re-initialize the section
                     } else {
                         alert("Please enter a valid name.");
                     }
