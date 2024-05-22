@@ -5,8 +5,37 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gals! The Game</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
+  <body class="flex items-center justify-center min-h-screen ">
+    <div id="menu" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-80" style="display: none;">
+      <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+          <div class="p-5">
+              <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Level 1</h5>
+              <h6 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">Help gals in the first challange in order to pass through the jungle! This is easy, but dont take it for granted</h6>
+              <img class="rounded-t-lg mb-4" src="/assets/level1.gif" alt="Game GIF" />
+              <div class="pb-4">
+                  <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">W</kbd>
+                  <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">A</kbd>
+                  <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">S</kbd>
+                  <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">D</kbd>
+                  <kbd class="p-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">SPACE</kbd>
+              </div>
+              <div class="flex flex-col space-y-4">
+                  <button id="restartButton" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                      Restart
+                  </button>
+                  <button id="startButton" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                      Start
+                  </button>
+                  <button id="menuButton" onclick="window.location.href='/index.html';" class="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
+                      Go to Menu
+                  </button>
+              </div>
+          </div>
+      </div>
+  </div>
     <style>
         body {
           margin: 0;
@@ -105,7 +134,19 @@
 
       
 
-      
+      function wallCollisionFront(){
+        if (chickenCube.position.z < -30 || chickenCube.position.z > 8){
+        return true;
+        }
+        return false;
+      }
+
+      function wallCollisionSide(){
+        if (chickenCube.position.x < -5 || chickenCube.position.x > 5){
+        return true;
+        }
+        return false;
+      }
 
 
       class Box extends THREE.Mesh {
@@ -167,7 +208,7 @@
           this.back = this.position.z - this.depth / 2
     
           this.velocity = velocity
-          this.gravity = -0.002
+          this.gravity = -0.004
     
           this.zAcceleration = zAcceleration
         }
@@ -224,6 +265,49 @@
           scoreDisplay.textContent = `Score: ${score}`;
         }
 
+      function setScore(score) {
+        let scores = JSON.parse(localStorage.getItem('level-scores'));
+        let nickname = localStorage.getItem('nickname');
+        const newScore = { "nickname": nickname, "score": score};
+        scores['Level 1'].push(newScore);
+
+        localStorage.setItem('level-scores', JSON.stringify(scores));
+      }
+
+      let KBDContainer = document.createElement('div');
+      KBDContainer.style.position = 'absolute';
+      KBDContainer.style.top = '20px';
+      KBDContainer.style.right = '20px';
+      KBDContainer.style.width = '100px';
+      KBDContainer.style.height = '60px';
+      KBDContainer.style.border = '2px solid #ffffff';
+      KBDContainer.style.backgroundColor = '#333333';
+      document.body.appendChild(KBDContainer); // Append the KBDContainer to the document body
+      let kbdElement1 = document.createElement('kbd');
+        let kbdElement2 = document.createElement('kbd');
+          kbdElement1.className = 'p-2 py-1.5 text-center text-xs max-width-[30px] font-semibold text-gray-800 bg-gray-100 border border-gray-200  dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500';
+          kbdElement1.textContent = 'SPACE';
+          kbdElement1.style.display = 'block';
+          kbdElement2.className = 'p-2 py-1.5 text-center text-xs max-width-[30px] font-semibold text-gray-800 bg-gray-100 border border-gray-200 dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500';
+          kbdElement2.textContent = 'SPACE';
+          kbdElement2.style.display = 'block';
+          KBDContainer.appendChild(kbdElement1); 
+          KBDContainer.appendChild(kbdElement2); 
+      function addKDB(percentage) {
+        if (percentage < 100){
+          kbdElement1.style.display = 'none';
+          kbdElement2.style.display = 'none';
+        }
+        else if (percentage < 200){
+          kbdElement1.style.display = 'block';
+          kbdElement2.style.display = 'none';
+        }
+        else {
+          kbdElement1.style.display = 'block';
+          kbdElement2.style.display = 'block';
+        }
+      }
+
       const groundtexture = new THREE.TextureLoader().load('/assets/foresttexture.jpg');
       groundtexture.wrapS = THREE.RepeatWrapping;
       groundtexture.wrapT = THREE.RepeatWrapping;
@@ -262,13 +346,6 @@
         }
       }
 
-      function wallCollision(box1){
-        if (chickenCube.position.x > 5 || chickenCube.position.x < -5 || chickenCube.position.z > 8 || chickenCube.position.z < -30){
-        return true;
-        }
-        return false;
-      }
-      
       const light = new THREE.DirectionalLight(0xffffff, 1)
       light.position.y = 3
       light.position.z = 1
@@ -291,6 +368,10 @@
         },
         w: {
           pressed: false
+        },
+        space : {
+          pressed: false,
+          jump: 200
         }
       }
     
@@ -311,13 +392,7 @@
             keys.w.pressed = true;
             break;
           case 'Space':
-            if (doubleJumpAvailable) {
-              chickenCube.velocity.y = 0.1;
-              doubleJumpAvailable = false;
-              setTimeout(() => {
-                doubleJumpAvailable = true;
-              }, 2000);
-            }
+            keys.space.pressed = true;
             break;
         }
       });
@@ -335,6 +410,9 @@
             break
           case 'KeyW':
             keys.w.pressed = false
+            break
+          case 'Space':
+            keys.space.pressed = false
             break
         }
       })
@@ -376,11 +454,22 @@
     
         if (keys.s.pressed) chickenCube.velocity.z = 0.05
         else if (keys.w.pressed) chickenCube.velocity.z = -0.05
+
+        if (keys.space.pressed && keys.space.jump - 100 >= 0 ){
+        chickenCube.velocity.y = 0.2
+        keys.space.jump = keys.space.jump - 100
+        keys.space.pressed = false
+        } else if (keys.space.jump < 200){
+        keys.space.jump = keys.space.jump + 0.5
+        }
+        
+        console.log(keys.space.jump)
+        addKDB(keys.space.jump);
     
         chickenCube.update(ground)
         if (chickenModel) {
           chickenModel.position.x = chickenCube.position.x 
-          chickenModel.position.y = chickenCube.position.y - 0.2 
+          chickenModel.position.y = chickenCube.position.y - 0.5 
           chickenModel.position.z = chickenCube.position.z - 0.2
         }
         logs.forEach((log) => {
@@ -393,65 +482,40 @@
             })
           ) {
             cancelAnimationFrame(animationId)
+            setScore(score);
+            showMenu("restart");
           }
         })
         
-        if (wallCollision({box1: chickenCube, walls: walls})) {
-          cancelAnimationFrame(animationId)
+
+        if (wallCollisionFront()) {
+          chickenCube.position.z = chickenCube.position.z > 7 ? 8 : -30;
+        }
+
+        if (wallCollisionSide()) {
+          chickenCube.position.x = chickenCube.position.x > 5 ? 5 : -5;
         }
 
 
-                
-
-        // if (frames % spawnRate === 0) {
-        //     if (spawnRate > 20) spawnRate -= 20;
-
-        //     const c = new Box({
-        //         width: 2,
-        //         height: 1,
-        //         depth: 1,
-        //         transparent: false,
-        //         position: {
-        //             x: 10, 
-        //             y: 1,
-        //             z: (Math.random() - 0.5) * 8, 
-        //         },
-        //         velocity: {
-        //             x: -0.1,
-        //             y: 0,
-        //             z: 0, // Adjust z velocity for car speed
-        //         },
-        //         zAcceleration: false // No need for z acceleration for cars
-        //     });
-        //     c.add(carModel.clone());
-        //     scene.add(c);
-        //     cars.push(c); 
-        // }
-
-        cars.forEach((car) => {
-            car.update(ground);
-            if (
-                boxCollision({
-                    box1: chickenCube,
-                    box2: car
-                })
-            ) {
-                cancelAnimationFrame(animationId);
-            }
-            // Remove cars that move out of view
-            if (car.position.z > 10) {
-                scene.remove(car);
-                const index = cars.indexOf(car);
-                if (index > -1) {
-                    cars.splice(index, 1);
-                }
-            }
-        });
         
         
     
         if (frames % spawnRate === 0) {
-          if (spawnRate > 5) spawnRate -= 5
+          
+          if (spawnRate > 200) spawnRate -= 5
+
+          if (spawnRate <= 200 && spawnRate > 100) spawnRate -= 1
+          
+          if (spawnRate <= 100 && spawnRate > 50) spawnRate -= 0.5
+
+          if (spawnRate <= 50 && spawnRate > 10) spawnRate -= 0.01
+          
+          if (spawnRate <= 10) spawnRate = 10
+
+          console.log(spawnRate)
+
+
+          
           
           var textureLoader = new THREE.TextureLoader();
 
@@ -501,7 +565,31 @@
         frames++
         
       }
-      animate()
+
+      function showMenu(restart) {
+        document.getElementById('menu').style.display = 'flex';
+        if (restart === "restart") {
+          document.getElementById('restartButton').style.display = 'flex';
+          document.getElementById('startButton').style.display = 'none';
+        } else {
+          document.getElementById('restartButton').style.display = 'none';
+          document.getElementById('startButton').style.display = 'flex';
+        }
+      }
+
+
+      document.getElementById('startButton').addEventListener('click', () => {
+        document.getElementById('menu').style.display = 'none';
+        setTimeout(100)
+        animate();
+      });
+
+
+      document.getElementById('restartButton').addEventListener('click', () => {
+        location.reload();
+      });
+
+      showMenu();
     </script>
 </body>
 </html>

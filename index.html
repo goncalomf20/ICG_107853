@@ -232,6 +232,8 @@
 
     const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true; // Enable shadow maps
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap; // Optional: softer shadows
     document.body.appendChild(renderer.domElement);
 
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -243,12 +245,24 @@
 
     loader.load('assets/forest/scene.gltf', function (gltf) {
         forestModel = gltf.scene;
+        forestModel.traverse(function(node) {
+            if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true; // Ensure the models receive shadows
+            }
+        });
         forestModel.scale.set(1, 1, 1);
         scene.add(forestModel);
     });
 
     loader.load('assets/sun/scene.gltf', function (gltf) {
         sunModel = gltf.scene;
+        sunModel.traverse(function(node) {
+            if (node.isMesh) {
+                node.castShadow = true;
+                node.receiveShadow = true;
+            }
+        });
         sunModel.scale.set(0.5, 0.5, 0.5);
         sunModel.position.set(0, 50, -100);
         scene.add(sunModel);
@@ -256,7 +270,11 @@
 
     const light = new THREE.DirectionalLight(0xffffff, 1);
     light.position.set(10, 20, 10);
-    light.castShadow = true;
+    light.castShadow = true; // Enable shadows from the light
+    light.shadow.mapSize.width = 2048; // Optional: increase shadow map resolution
+    light.shadow.mapSize.height = 2048;
+    light.shadow.camera.near = 0.5; // Optional: adjust shadow camera settings
+    light.shadow.camera.far = 50;
     scene.add(light);
 
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);

@@ -13,9 +13,9 @@
   <div id="menu" class="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-80" style="display: none;">
     <div class="max-w-sm bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
         <div class="p-5">
-            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Level 3</h5>
+            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">Level 2</h5>
             <h6 class="mb-2 text-lg font-medium text-gray-900 dark:text-white">In this level, you are challanged to see if "gals" can survive the 6pm traffic madness in the city. Seing from the gals, prespective, try to survive as long as you can!</h6>
-            <img class="rounded-t-lg mb-4" src="/assets/level3.gif" alt="Game GIF" />
+            <img class="rounded-t-lg mb-4" src="/assets/level2.gif" alt="Game GIF" />
             <div class="pb-4">
                 <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">W</kbd>
                 <kbd class="px-2 py-1.5 text-xs font-semibold text-gray-800 bg-gray-100 border border-gray-200 rounded-lg dark:bg-gray-600 dark:text-gray-100 dark:border-gray-500">A</kbd>
@@ -65,7 +65,7 @@
       import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(90, window.innerWidth / window.innerHeight, 1, 1000);
+      const camera = new THREE.PerspectiveCamera(100, window.innerWidth / window.innerHeight, 1, 1000);
       const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
       renderer.shadowMap.enabled = true;
       renderer.setSize(window.innerWidth, window.innerHeight);
@@ -73,7 +73,7 @@
       
 
       // Set the camera position and orientation to look straight ahead
-      camera.position.set(0, 5, 5); // Adjust the y and z values to your preference
+      camera.position.set(0, 0, 0); // Adjust the y and z values to your preference
       camera.lookAt(0, 0, 0);
 
 
@@ -153,6 +153,7 @@
           color = '#ff0000',
           texture = null,
           opacity = 1,
+          poof = false,
           velocity = {
             x: 0,
             y: 0,
@@ -189,7 +190,7 @@
           else {
             this.route = 0;
           }
-          
+          this.poof = poof
           this.width = width
           this.height = height
           this.depth = depth
@@ -252,21 +253,56 @@
           } else this.position.y += this.velocity.y
         }
       }
-      let score = 0; // Initialize the score
-        let scoreDisplay = document.createElement('div'); // Create a DOM element to display the score
-        scoreDisplay.style.position = 'absolute';
-        scoreDisplay.style.top = '10px';
-        scoreDisplay.style.left = '10px';
-        scoreDisplay.style.color = '#ffffff';
-        scoreDisplay.style.fontFamily = 'Arial';
-        scoreDisplay.style.fontSize = '24px';
-        document.body.appendChild(scoreDisplay); // Append the score display to the document body
 
-        function updateScore() {
-          score++;
-          scoreDisplay.textContent = `Score: ${score}`;
-        }
+      function setScore(score) {
+        let scores = JSON.parse(localStorage.getItem('level-scores'));
+        let nickname = localStorage.getItem('nickname');
+        const newScore = { "nickname": nickname, "score": score};
+        scores['Level 2'].push(newScore);
 
+        localStorage.setItem('level-scores', JSON.stringify(scores));
+      }
+      
+      let score = 0; 
+      let scoreDisplay = document.createElement('div'); // Create a DOM element to display the score
+      scoreDisplay.style.position = 'absolute';
+      scoreDisplay.style.top = '10px';
+      scoreDisplay.style.left = '10px';
+      scoreDisplay.style.color = '#ffffff';
+      scoreDisplay.style.fontFamily = 'Arial';
+      scoreDisplay.style.fontSize = '24px';
+      document.body.appendChild(scoreDisplay); // Append the score display to the document body
+
+      function updateScore() {
+        score++;
+        scoreDisplay.textContent = `Score: ${score}`;
+      }
+
+      let progressBarContainer = document.createElement('div');
+      progressBarContainer.style.position = 'absolute';
+      progressBarContainer.style.top = '10px';
+      progressBarContainer.style.right = '10px';
+      progressBarContainer.style.width = '200px';
+      progressBarContainer.style.height = '30px';
+      progressBarContainer.style.border = '2px solid #ffffff';
+      progressBarContainer.style.backgroundColor = '#333333';
+       // Append the progress bar container to the document body
+
+      // Create the progress bar itself
+      let progressBar = document.createElement('div');
+      progressBar.style.height = '100%';
+      progressBar.style.width = '0%'; // Initial width is 0%
+      progressBar.style.backgroundColor = '#00ff00';
+      progressBarContainer.appendChild(progressBar); // Append the progress bar to the container
+
+      function updateProgressBar(percentage) {
+        document.body.appendChild(progressBarContainer);
+        if (percentage < 0) percentage = 0;
+        if (percentage > 100) percentage = 100;
+        progressBar.style.width = `${percentage}%`;
+      }
+
+    
 
       const ground = new Box({
         width: 70,
@@ -309,8 +345,8 @@
     
       scene.add(new THREE.AmbientLight(0xffffff, 0.5))
     
-  
-    
+      
+      
       const keys = {
         a: {
           pressed: false
@@ -323,53 +359,95 @@
         },
         w: {
           pressed: false
+        },
+        up: { 
+          pressed: true
+        },
+        down: { 
+          pressed: false 
+        },
+        right: {
+          pressed: false
+        },
+        left: { 
+          pressed: false 
+        },
+        space: {
+          pressed: false,
+          turbo: 100
         }
       }
 
-      function wallCollision(box1){
-        if (chickenCube.position.x > 35 || chickenCube.position.x < -35 || chickenCube.position.z > 5 || chickenCube.position.z < -80){
+      function wallCollisionFront(box1){
+        if (chickenCube.position.z < -17 || chickenCube.position.z > 5){
         return true;
         }
         return false;
       }
-    
+
+      function wallCollisionSide(box1){
+        if (chickenCube.position.x < -34 || chickenCube.position.x > 34){
+        return true;
+        }
+        return false;
+      }
+
+
       let doubleJumpAvailable = true; // Flag to check if double jump is available
 
-      window.addEventListener('keydown', (event) => {
-        switch (event.code) {
-          case 'KeyA':
-            keys.a.pressed = true;
-            break;
-          case 'KeyD':
-            keys.d.pressed = true;
-            break;
-          case 'KeyS':
-            keys.s.pressed = true;
-            break;
-          case 'KeyW':
-            keys.w.pressed = true;
-            break;
-          case 'KeyUp':
-            keys.up.pressed = true;
-            break;
-          case 'KeyDown':
-            keys.down.pressed = true;
-            break;
-          case 'KeyRight':
-            keys.right.pressed = true;
-            break;
-          case 'KeyLeft':
-            keys.left.pressed = true;
-            break;
+        window.addEventListener('keydown', (event) => {
+          switch (event.code) {
+            case 'KeyA':
+              keys.a.pressed = true;
+              break;
+            case 'KeyD':
+              keys.d.pressed = true;
+              break;
+            case 'KeyS':
+              keys.s.pressed = true;
+              break;
+            case 'KeyW':
+              keys.w.pressed = true;
+              break;
+            case 'ArrowUp':
+              chickenCube.rotation.y = 0;
+              chickenModel.rotation.y = 0;
+              camera.rotation.y = 0;
+              keys.up.pressed = true;
+              keys.down.pressed = false;
+              keys.right.pressed = false;
+              keys.left.pressed = false;
+              break;
+            case 'ArrowDown':
+              chickenCube.rotation.y = Math.PI;
+              chickenModel.rotation.y = Math.PI;
+              camera.rotation.y = Math.PI;
+              keys.down.pressed = true;
+              keys.up.pressed = false;
+              keys.right.pressed = false;
+              keys.left.pressed = false;
+              break;
+          case 'ArrowRight':
+              chickenCube.rotation.y = -Math.PI/2;
+              chickenModel.rotation.y = -Math.PI/2;
+              camera.rotation.y = -Math.PI/2;
+              keys.right.pressed = true;
+              keys.left.pressed = false;
+              keys.up.pressed = false;
+              keys.down.pressed = false;
+              break;
+          case 'ArrowLeft':
+              chickenCube.rotation.y = Math.PI/2;
+              chickenModel.rotation.y = Math.PI/2;
+              camera.rotation.y = Math.PI/2;
+              keys.left.pressed = true;
+              keys.right.pressed = false;
+              keys.up.pressed = false;
+              keys.down.pressed = false;
+              break;
           case 'Space':
-            if (doubleJumpAvailable) {
-              chickenCube.velocity.y = 0.1;
-              doubleJumpAvailable = false;
-              setTimeout(() => {
-                doubleJumpAvailable = true;
-              }, 1000);
-            }
-            break;
+              keys.space.pressed = true;
+              break;
         }
       });   
         
@@ -387,18 +465,9 @@
           case 'KeyW':
             keys.w.pressed = false
             break
-          case 'KeyUp':
-            keys.up.pressed = false;
-            break;
-          case 'KeyDown':
-            keys.down.pressed = false;
-            break;
-          case 'KeyRight':
-            keys.right.pressed = false;
-            break;
-          case 'KeyLeft':
-            keys.left.pressed = false;
-            break;
+          case 'Space':
+            keys.space.pressed = false
+            break
         }
       })
     
@@ -432,66 +501,114 @@
       let spawnRate = 400
       function animate() {
         const animationId = requestAnimationFrame(animate)
-        if (chickenModel) {
-          // Gradually rotate the chicken towards the target rotation
-          const currentRotation = chickenModel.rotation.y;
-          if (Math.abs(currentRotation - targetRotation) > rotationSpeed) {
-            if (currentRotation < targetRotation) {
-              chickenModel.rotation.y += rotationSpeed;
-            } else {
-              chickenModel.rotation.y -= rotationSpeed;
-            }
-          } else {
-            chickenModel.rotation.y = targetRotation;
-          }
-        }
         renderer.render(scene, camera)
-    
+        
+        updateScore()
+
         // movement code
         chickenCube.velocity.x = 0
         chickenCube.velocity.z = 0
-        if (keys.a.pressed) chickenCube.velocity.x = -0.05
-        else if (keys.d.pressed) chickenCube.velocity.x = 0.05
-    
-        if (keys.s.pressed) chickenCube.velocity.z = 0.05
-        else if (keys.w.pressed) chickenCube.velocity.z = -0.05
+        
+        if (keys.a.pressed && keys.up.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.x = -0.2
+        else if (keys.a.pressed && keys.up.pressed) chickenCube.velocity.x = -0.05
+        else if (keys.d.pressed && keys.up.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.x = 0.2
+        else if (keys.d.pressed && keys.up.pressed) chickenCube.velocity.x = 0.05
+        
 
+        if (keys.s.pressed && keys.up.pressed && (keys.space.pressed && keys.space.turbo > 0)) chickenCube.velocity.z = 0.2
+        else if (keys.s.pressed && keys.up.pressed) chickenCube.velocity.z = 0.05
+        else if (keys.w.pressed && keys.up.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.z = -0.2
+        else if (keys.w.pressed && keys.up.pressed) chickenCube.velocity.z = -0.05
+
+
+        if (keys.a.pressed && keys.right.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.z = -0.2
+        else if (keys.a.pressed && keys.right.pressed) chickenCube.velocity.z = -0.05
+        else if (keys.d.pressed && keys.right.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.z = 0.2
+        else if (keys.d.pressed && keys.right.pressed) chickenCube.velocity.z = 0.05
+        
+        if (keys.s.pressed && keys.right.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.x = -0.2
+        else if (keys.s.pressed && keys.right.pressed) chickenCube.velocity.x = -0.05
+        else if (keys.w.pressed && keys.right.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.x = 0.2
+        else if (keys.w.pressed && keys.right.pressed) chickenCube.velocity.x = 0.05
+
+        if (keys.d.pressed && keys.down.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.x = -0.2
+        else if (keys.d.pressed && keys.down.pressed) chickenCube.velocity.x = -0.05
+        else if (keys.a.pressed && keys.down.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.x = 0.2
+        else if (keys.a.pressed && keys.down.pressed) chickenCube.velocity.x = 0.05
+        
+
+        if (keys.w.pressed && keys.down.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.z = 0.2
+        else if (keys.w.pressed && keys.down.pressed) chickenCube.velocity.z = 0.05
+        else if (keys.s.pressed && keys.down.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.z = -0.2
+        else if (keys.s.pressed && keys.down.pressed) chickenCube.velocity.z = -0.05
+
+        if (keys.d.pressed && keys.left.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.z = -0.2
+        else if (keys.d.pressed && keys.left.pressed) chickenCube.velocity.z = -0.05
+        else if (keys.a.pressed && keys.left.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.z = 0.2
+        else if (keys.a.pressed && keys.left.pressed) chickenCube.velocity.z = 0.05
     
+        if (keys.w.pressed && keys.left.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.x = -0.2
+        else if (keys.w.pressed && keys.left.pressed) chickenCube.velocity.x = -0.05
+        else if (keys.s.pressed && keys.left.pressed && keys.space.pressed && keys.space.turbo > 0) chickenCube.velocity.x = 0.2
+        else if (keys.s.pressed && keys.left.pressed) chickenCube.velocity.x = 0.05
+
         chickenCube.update(ground)
         if (chickenModel) {
           chickenModel.position.x = chickenCube.position.x 
           chickenModel.position.y = chickenCube.position.y - 0.2 
           chickenModel.position.z = chickenCube.position.z - 0.2
         }
+        if (keys.space.pressed && keys.space.turbo >= 0){
+        console.log(keys.space.turbo)
+        keys.space.turbo = keys.space.turbo - 1
+        } else if (keys.space.turbo < 100){
+        keys.space.turbo = keys.space.turbo + 0.5
+        }
+         
+        
         
 
-        if (wallCollision({box1: chickenCube, walls: walls})) {
-          cancelAnimationFrame(animationId)
+        console.log(chickenCube.position.x,chickenCube.position.z)
+        if (wallCollisionFront({box1: chickenCube, walls: walls})) {
+          chickenCube.position.z = chickenCube.position.z > 4 ? 5 : -17;
+        }
+
+        if (wallCollisionSide({box1: chickenCube, walls: walls})) {
+          chickenCube.position.x = chickenCube.position.x > 32 ? 32 : -32;
         }
         
         camera.position.set(
         chickenCube.position.x,
         chickenCube.position.y + 2,  // Adjust the height to be slightly above the chicken
-        chickenCube.position.z + 3  // Adjust the distance to be slightly behind the chicken 
+        chickenCube.position.z  // Adjust the distance to be slightly behind the chicken 
         );
         
-        const direction = new THREE.Vector3(0, 0, -1).applyQuaternion(chickenCube.quaternion);
-        camera.lookAt(chickenCube.position.clone().add(direction));
 
+        updateProgressBar(keys.space.turbo);
 
 
         if (frames % spawnRate === 0) {
-            if (spawnRate > 2) spawnRate -= 2;
+            if (spawnRate > 200) spawnRate -= 2
+
+            if (spawnRate <= 200 && spawnRate > 100) spawnRate -= 1
+
+            if (spawnRate <= 100 && spawnRate > 50) spawnRate -= 0.5
+
+            if (spawnRate <= 50 && spawnRate > 10) spawnRate -= 0.01
+
+            if (spawnRate <= 10) spawnRate = 10
+
+            console.log(spawnRate);
 
             const c = new Box({
-                width: 2,
+                width: 3,
                 height: 1,
                 depth: 1,
-                transparent: false,
+                opacity: 0,
                 position: {
                     x: 10, 
-                    y: 1,
-                    z: (Math.random() - 0.5) * 8, 
+                    y: 0.5,
+                    z: (Math.random() * -17)
                 },
                 velocity: {
                     x: -0.1,
@@ -511,6 +628,9 @@
 
         cars.forEach((car) => {
         car.update(ground);
+        if (car.poof) {
+            scene.remove(car);  
+        }
         if (car.position.x < -30 + car.route && car.rotation.y == 0) {  
             car.rotation.y = - Math.PI / 2; // Rotate the car
             car.velocity.x = 0; 
@@ -526,10 +646,12 @@
             car.velocity.x = 0; 
             car.velocity.z = 0.1; // Adjust the velocity to turn right
         }
-        if (car.position.z > 5 - car.route && car.rotation.y == Math.PI / 2) {
+        if (car.position.z > 0 - car.route && car.rotation.y == Math.PI / 2) {
             car.rotation.y = 0; // Rotate the car
             car.velocity.x = -0.1; 
             car.velocity.z = 0; // Adjust the velocity to turn left
+            poof = true;
+
         }
         if (
             boxCollision({
@@ -538,6 +660,8 @@
             })
         ) {
             cancelAnimationFrame(animationId);
+            setScore(score)
+            showMenu("restart");
         }
         // Remove cars that move out of view
         if (car.position.z == 10) {
@@ -557,36 +681,13 @@
           if (spawnRate > 20) spawnRate -= 20
           
           var textureLoader = new THREE.TextureLoader();
-
-          const log = new Box({
-            width: 2,
-            height: 1,
-            opacity: 0,
-            depth: 1,
-            texture: textureLoader.load('assets/woodtexture.jpg'),
-            transparent:false,
-            position: {
-              x: (Math.random() - 0.5) * 10,
-              y: 0,
-              z: -20
-            },
-            velocity: {
-              x: 0,
-              y: 0,
-              z: 0.005
-            },
-            zAcceleration: true
-          })
-          scene.add(log)
-          logs.push(log)
-          
         } 
        
         const car = new Box({
-            width: 2,
-            height: 1,
+            width: 9,
+            height: 4,
             opacity: 0,
-            depth: 1,
+            depth: 3,
             transparent:false,
             position: {
               x: (Math.random() - 0.5) * 10,
@@ -596,7 +697,7 @@
             velocity: {
               x: 0,
               y: 0,
-              z: 0.005
+              z: 0.1
             },
             zAcceleration: true
           })
